@@ -14,6 +14,7 @@ Output:
 
 import sys
 import unicodedata
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -62,14 +63,14 @@ def _script_name(char: str) -> str:
     return "Other"
 
 
-def parse_confusables(text: str) -> dict:
+def parse_confusables(text: str) -> dict[str, tuple[str, str]]:
     """Parse confusables.txt and return {source_char: (target_char, script)} dict.
 
     Only keeps entries where:
     - The source is a single Unicode character.
     - The target resolves to a single ASCII-printable character.
     """
-    mapping: dict = {}
+    mapping: dict[str, tuple[str, str]] = {}
     for raw_line in text.splitlines():
         line = raw_line.strip()
         # Skip blank lines and comments
@@ -111,7 +112,7 @@ def parse_confusables(text: str) -> dict:
     return mapping
 
 
-def render_module(mapping: dict) -> str:
+def render_module(mapping: dict[str, tuple[str, str]]) -> str:
     """Render the Python module source for homoglyphs_generated.py."""
     lines = [
         '"""Auto-generated extended homoglyph map from Unicode Confusables data.',
@@ -120,9 +121,10 @@ def render_module(mapping: dict) -> str:
         "",
         "DO NOT EDIT — regenerate with:  python scripts/build_homoglyphs.py",
         '"""',
+        "from __future__ import annotations",
         "",
         "# Maps confusable Unicode char -> (ascii_equivalent, script_name)",
-        "EXTENDED_HOMOGLYPH_MAP: dict = {",
+        "EXTENDED_HOMOGLYPH_MAP: dict[str, tuple[str, str]] = {",
     ]
 
     for src_char, (tgt_char, script) in sorted(mapping.items(), key=lambda kv: ord(kv[0])):
@@ -147,7 +149,7 @@ def main() -> None:
     try:
         with urllib.request.urlopen(CONFUSABLES_URL, timeout=30) as resp:
             raw = resp.read().decode("utf-8-sig")
-    except Exception as exc:  # noqa: BLE001
+    except (urllib.error.URLError, OSError) as exc:
         print(f"ERROR: could not fetch confusables.txt: {exc}", file=sys.stderr)
         sys.exit(1)
 

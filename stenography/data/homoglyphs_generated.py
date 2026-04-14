@@ -4,9 +4,10 @@ Source: https://www.unicode.org/Public/security/latest/confusables.txt
 
 DO NOT EDIT — regenerate with:  python scripts/build_homoglyphs.py
 """
+from __future__ import annotations
 
 # Maps confusable Unicode char -> (ascii_equivalent, script_name)
-EXTENDED_HOMOGLYPH_MAP: dict = {
+EXTENDED_HOMOGLYPH_MAP: dict[str, tuple[str, str]] = {
     "\u00D0": ("D", "Latin-Ext"),  # LATIN CAPITAL LETTER ETH -> U+0044
     "\u00D8": ("O", "Latin-Ext"),  # LATIN CAPITAL LETTER O WITH STROKE -> U+004F
     "\u00F0": ("d", "Latin-Ext"),  # LATIN SMALL LETTER ETH -> U+0064
