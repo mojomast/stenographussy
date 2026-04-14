@@ -21,6 +21,9 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 
+[project.optional-dependencies]
+pre-commit = ["pre-commit>=3.0"]
+
 [project.scripts]
 stenography = "stenography.cli:main"
 

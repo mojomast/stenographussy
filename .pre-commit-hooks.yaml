@@ -1,0 +1,7 @@
+- id: stenography
+  name: Stenography — steganographic attack detector
+  description: Detect zero-width characters, homoglyphs, RTL overrides, and other invisible steganographic attacks in source code
+  language: python
+  entry: stenography scan
+  types_or: [python, javascript, typescript, go, rust, java, c, c++, text]
+  pass_filenames: true

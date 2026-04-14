@@ -511,6 +511,33 @@ class TestCLI:
         os.unlink(f.name)
         assert exit_code == 1
 
+    def test_exit_zero_suppresses_nonzero_exit(self, capsys):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("password\u200b = 'secret'\n")
+            f.flush()
+            exit_code = cli_main(["scan", "--exit-zero", f.name])
+        os.unlink(f.name)
+        assert exit_code == 0  # --exit-zero forces exit 0 even with findings
+
+    def test_quiet_suppresses_output(self, capsys):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("password\u200b = 'secret'\n")
+            f.flush()
+            exit_code = cli_main(["scan", "--quiet", f.name])
+        os.unlink(f.name)
+        captured = capsys.readouterr()
+        assert exit_code == 1          # findings still set exit code
+        assert captured.out == ""      # but output is suppressed
+
+    def test_quiet_with_exit_zero(self, capsys):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
+            f.write("password\u200b = 'secret'\n")
+            f.flush()
+            exit_code = cli_main(["scan", "--quiet", "--exit-zero", f.name])
+        os.unlink(f.name)
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        assert captured.out == ""
 
 # ── Integration Test ─────────────────────────────────────────────────────────
 
