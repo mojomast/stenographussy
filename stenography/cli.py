@@ -43,6 +43,14 @@ def create_parser() -> argparse.ArgumentParser:
         "--no-color", action="store_true",
         help="Disable colored output"
     )
+    scan_parser.add_argument(
+        "--quiet", "-q", action="store_true",
+        help="Suppress output; only set exit code"
+    )
+    scan_parser.add_argument(
+        "--exit-zero", action="store_true",
+        help="Always exit with code 0 even when findings are detected (warn-only mode)"
+    )
 
     # diff subcommand
     diff_parser = subparsers.add_parser("diff", help="Scan only changed lines in a git diff")
@@ -60,6 +68,14 @@ def create_parser() -> argparse.ArgumentParser:
     diff_parser.add_argument(
         "--no-color", action="store_true",
         help="Disable colored output"
+    )
+    diff_parser.add_argument(
+        "--quiet", "-q", action="store_true",
+        help="Suppress output; only set exit code"
+    )
+    diff_parser.add_argument(
+        "--exit-zero", action="store_true",
+        help="Always exit with code 0 even when findings are detected (warn-only mode)"
     )
 
     return parser
@@ -94,8 +110,9 @@ def main(argv=None):
         else:
             output = fmt.format(result)
 
-        print(output)
-        return 1 if result.total_findings > 0 else 0
+        if not args.quiet:
+            print(output)
+        return 0 if args.exit_zero else (1 if result.total_findings > 0 else 0)
 
     elif args.command == "diff":
         result = engine.scan_diff(args.ref)
@@ -109,8 +126,9 @@ def main(argv=None):
         else:
             output = fmt.format(result)
 
-        print(output)
-        return 1 if result.total_findings > 0 else 0
+        if not args.quiet:
+            print(output)
+        return 0 if args.exit_zero else (1 if result.total_findings > 0 else 0)
 
     return 0
 

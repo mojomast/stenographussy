@@ -199,15 +199,75 @@ Scan Options:
   --format, -f          Output format: table, json, sarif (default: table)
   --entropy-threshold   Whitespace entropy threshold 0-1 (default: 0.8)
   --no-color            Disable colored output
+  --quiet, -q           Suppress output; only set exit code
+  --exit-zero           Always exit 0 even when findings are detected (warn-only)
 
 Diff Options:
   REF                   Git diff reference (e.g., HEAD~1, main..feature)
   --format, -f          Output format: table, json, sarif (default: table)
   --entropy-threshold   Whitespace entropy threshold 0-1 (default: 0.8)
+  --quiet, -q           Suppress output; only set exit code
+  --exit-zero           Always exit 0 even when findings are detected (warn-only)
 
 Exit Codes:
-  0  No findings (clean)
+  0  No findings (clean), or --exit-zero was passed
   1  Findings detected
+```
+
+## 🔗 Pre-commit Integration
+
+Stenography ships a [pre-commit](https://pre-commit.com/) hook so you can automatically scan staged files before every commit.
+
+### Setup
+
+1. Install pre-commit (if you haven't already):
+
+```bash
+pip install pre-commit
+```
+
+2. Add the following to your project's `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/mojomast/stenographussy
+    rev: v1.0.0   # replace with the latest tag
+    hooks:
+      - id: stenography
+```
+
+3. Install the hooks into your local repository:
+
+```bash
+pre-commit install
+```
+
+4. Run against all files to check for existing issues:
+
+```bash
+pre-commit run --all-files
+```
+
+### Warn-only mode
+
+If you want pre-commit to report findings without blocking commits (e.g., while rolling out the check), pass `--exit-zero`:
+
+```yaml
+repos:
+  - repo: https://github.com/mojomast/stenographussy
+    rev: v1.0.0
+    hooks:
+      - id: stenography
+        args: [--exit-zero]
+```
+
+### Quiet mode
+
+To suppress report output and only rely on the exit code (useful in CI pipelines), pass `--quiet`:
+
+```yaml
+      - id: stenography
+        args: [--quiet]
 ```
 
 ## 🧪 Running Tests
