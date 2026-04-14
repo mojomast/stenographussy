@@ -230,6 +230,42 @@ class TestHomoglyphScanner:
                 findings.extend(self.scanner.scan_line("homoglyph_test.txt", i, line))
         assert len(findings) >= 5
 
+    def test_extended_map_loaded(self):
+        """Verify the extended map from Unicode Confusables is merged in."""
+        from stenography.scanners.homoglyph import HOMOGLYPH_MAP
+        # The extended map adds hundreds of entries; total should be well above 200.
+        assert len(HOMOGLYPH_MAP) >= 200
+
+    def test_detects_malayalam_ra(self):
+        """U+0D30 MALAYALAM LETTER RA looks like Latin 'o' — issue example."""
+        line = "auth\u0D30r = 'evil'"
+        findings = self.scanner.scan_line("test.py", 1, line)
+        assert any("Homoglyph" in f.message for f in findings)
+
+    def test_detects_cherokee_tli(self):
+        """U+13DA CHEROKEE LETTER DU looks like Latin 'W' — issue example."""
+        line = "\u13DAord = 'secret'"
+        findings = self.scanner.scan_line("test.py", 1, line)
+        assert any("Homoglyph" in f.message for f in findings)
+
+    def test_detects_armenian_vo(self):
+        """U+0548 ARMENIAN CAPITAL LETTER VO looks like Latin 'U' — issue example."""
+        line = "\u0548ser = 'admin'"
+        findings = self.scanner.scan_line("test.py", 1, line)
+        assert any("Homoglyph" in f.message for f in findings)
+
+    def test_extended_homoglyph_map_importable(self):
+        """The generated data module must be importable."""
+        from stenography.data.homoglyphs_generated import EXTENDED_HOMOGLYPH_MAP
+        assert isinstance(EXTENDED_HOMOGLYPH_MAP, dict)
+        assert len(EXTENDED_HOMOGLYPH_MAP) >= 200
+
+    def test_static_map_takes_precedence(self):
+        """Static curated entries must not be overwritten by generated data."""
+        from stenography.scanners.homoglyph import HOMOGLYPH_MAP
+        # Cyrillic а (U+0430) is in the static map -> Latin 'a'
+        assert HOMOGLYPH_MAP.get("\u0430") == ("a", "Cyrillic")
+
 
 # ── RTL Scanner Tests ────────────────────────────────────────────────────────
 

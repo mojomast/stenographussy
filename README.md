@@ -86,14 +86,24 @@ password​ = "secret"  # Has invisible ZWSP after 'password'
 
 ### 2. Homoglyph Detector (`STEN002`)
 
-Scans identifiers and string literals for mixed-script characters that look identical but have different Unicode codepoints. Uses 50+ known homoglyph pairs across Cyrillic, Greek, Latin, and fullwidth character sets.
+Scans identifiers and string literals for mixed-script characters that look identical but have different Unicode codepoints. Uses the full **Unicode Confusables** dataset (hundreds of pairs across many scripts) with a curated core set as a reliable fallback.
 
 **Detects:**
 - Cyrillic/Latin confusables (а↔a, е↔e, о↔o, р↔p, с↔c, etc.)
 - Greek/Latin confusables (Α↔A, Β↔B, Ο↔O, etc.)
+- Armenian, Georgian, Cherokee, Malayalam and many other scripts
 - Lookalike digits (0/O, 1/l/I)
 - Fullwidth variants (ａ↔a, Ａ↔A, etc.)
+- Mathematical / phonetic / IPA lookalikes
 - Mixed-script identifiers (CRITICAL)
+
+Extended coverage is provided by `stenography/data/homoglyphs_generated.py`, which is
+pre-built from the [Unicode Confusables dataset](https://www.unicode.org/Public/security/latest/confusables.txt).
+To regenerate it (e.g. after a Unicode version update) run:
+
+```bash
+python scripts/build_homoglyphs.py
+```
 
 **Example attack:**
 ```python
