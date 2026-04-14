@@ -9,7 +9,8 @@ identical but have different Unicode codepoints. Covers:
 - Full-width variants
 - Custom developer-relevant pairs
 
-Includes 50+ known homoglyph pairs.
+Uses the full Unicode Confusables dataset (thousands of pairs) when the
+generated data file is available, with a curated static map as the fallback.
 """
 
 import unicodedata
@@ -100,6 +101,16 @@ HOMOGLYPH_MAP = {
 
 # Clean up any placeholder entries
 HOMOGLYPH_MAP = {k: v for k, v in HOMOGLYPH_MAP.items() if len(k) == 1}
+
+# Merge with the extended map generated from the Unicode Confusables dataset.
+# The static curated map takes precedence over the generated entries.
+try:
+    from stenography.data.homoglyphs_generated import EXTENDED_HOMOGLYPH_MAP as _EXTENDED
+    # Only add entries not already in the curated static map
+    _merged = {k: v for k, v in _EXTENDED.items() if k not in HOMOGLYPH_MAP}
+    HOMOGLYPH_MAP = {**_merged, **HOMOGLYPH_MAP}
+except ImportError:
+    pass
 
 # Build reverse lookup: for a given identifier, extract the "canonical" Latin form
 def _get_script(char: str) -> str:
